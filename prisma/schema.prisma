@@ -65,40 +65,6 @@ model RecommendationLog {
   @@map("recommendation_logs")
 }
 
-// =============================================================================
-// TABEL 4: raw_sensor_logs
-// Menyimpan log data sensor mentah dari ESP32 secara berkala.
-//
-// ⚠️ CATATAN PENTING (PostgreSQL Native Table Partitioning):
-// Tabel ini TIDAK dikelola melalui perintah migrasi Prisma (prisma migrate dev).
-// Tabel ini dibuat SECARA MANUAL menggunakan kueri SQL di Supabase SQL Editor
-// dengan deklarasi PARTITION BY RANGE (timestamp) untuk dioptimalkan sebagai
-// tabel deret waktu (time-series).
-//
-// Jalankan kueri SQL berikut di Supabase SQL Editor SEBELUM prisma db pull:
-//
-//   CREATE TABLE "raw_sensor_logs" (
-//     "id"         SERIAL,
-//     "timestamp"  TIMESTAMPTZ NOT NULL DEFAULT now(),
-//     "device_id"  VARCHAR(50) NOT NULL,
-//     "ph"         DOUBLE PRECISION NOT NULL,
-//     "moisture"   DOUBLE PRECISION NOT NULL,
-//     PRIMARY KEY  ("timestamp", "id")
-//   ) PARTITION BY RANGE ("timestamp");
-//
-//   -- Buat partisi untuk bulan aktif saat ini (sesuaikan rentang tanggalnya):
-//   CREATE TABLE "raw_sensor_logs_y2026m05"
-//     PARTITION OF "raw_sensor_logs"
-//     FOR VALUES FROM ('2026-05-01 00:00:00+00') TO ('2026-06-01 00:00:00+00');
-//
-//   CREATE TABLE "raw_sensor_logs_y2026m06"
-//     PARTITION OF "raw_sensor_logs"
-//     FOR VALUES FROM ('2026-06-01 00:00:00+00') TO ('2026-07-01 00:00:00+00');
-//
-// Setelah tabel terbentuk, jalankan: npx prisma db pull
-// Prisma akan mendeteksi tabel ini secara otomatis dan model di bawah
-// akan diperbarui oleh Prisma.
-// =============================================================================
 model RawSensorLog {
   id        Int      @default(autoincrement())
   timestamp DateTime @default(now()) @db.Timestamptz(6)
@@ -127,16 +93,28 @@ model Plant {
   @@map("plants")
 }
 
-model Polybag {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String   @db.VarChar(100)
-  diameter    Float
-  height      Float
-  volumeLiter Float    @map("volume_liter")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+model PolybagType {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(100)
+  diameter  Float
+  height    Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  devices Device[]
+  polybags  Polybag[]
+
+  @@map("polybag_types")
+}
+
+model Polybag {
+  id              String      @id @default(uuid()) @db.Uuid
+  polybagTypeId   String      @map("polybag_type_id") @db.Uuid
+  soilVolumeLiter Float       @map("soil_volume_liter")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  polybagType PolybagType @relation(fields: [polybagTypeId], references: [id], onDelete: Restrict)
+  devices     Device[]
 
   @@map("polybags")
 }

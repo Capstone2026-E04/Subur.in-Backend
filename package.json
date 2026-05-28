@@ -7,6 +7,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "db:generate": "prisma generate",
+    "db:seed": "node prisma/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -35,6 +36,9 @@
   "devDependencies": {
     "nodemon": "^3.1.0",
     "prisma": "^6.19.3"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "bugs": {
     "url": "https://github.com/Capstone2026-E04/Subur.in-Backend/issues"
