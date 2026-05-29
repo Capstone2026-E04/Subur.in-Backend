@@ -41,20 +41,36 @@ exports.googleSignIn = async (req, res) => {
       });
     }
 
-    const user = await prisma.user.upsert({
-      where: { googleId: googleId },
-      update: {
-        name: name,
-        email: email,
-        avatarUrl: avatarUrl
-      },
-      create: {
-        googleId: googleId,
-        name: name,
-        email: email,
-        avatarUrl: avatarUrl
-      }
+    let user = await prisma.user.findUnique({
+      where: { googleId: googleId }
     });
+
+    if (user) {
+    } else {
+      const existingUserByEmail = await prisma.user.findUnique({
+        where: { email: email }
+      });
+
+      if (existingUserByEmail) {
+        user = await prisma.user.update({
+          where: { id: existingUserByEmail.id },
+          data: {
+            googleId: googleId,
+            name: existingUserByEmail.name || name,
+            avatarUrl: existingUserByEmail.avatarUrl || avatarUrl
+          }
+        });
+      } else {
+        user = await prisma.user.create({
+          data: {
+            googleId: googleId,
+            name: name,
+            email: email,
+            avatarUrl: avatarUrl
+          }
+        });
+      }
+    }
 
     const sessionToken = jwt.sign(
       { 
