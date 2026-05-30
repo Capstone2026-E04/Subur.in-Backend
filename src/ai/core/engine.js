@@ -2,9 +2,7 @@ const { buildMembershipFunctions } = require('./membership');
 const RULE_BASE = require('./rules');
 const FUZZY_PARAMETERS = require('../config/fuzzy_parameters');
 
-/**
- * Mengevaluasi aturan fuzzy dasar (20 aturan) terhadap derajat keanggotaan saat ini.
- */
+
 function evaluateRules(membership) {
   const activeRules = [];
 
@@ -27,9 +25,7 @@ function evaluateRules(membership) {
   return activeRules;
 }
 
-/**
- * Mengagregasikan nilai derajat keanggotaan aktif pada koordinat output y.
- */
+
 function aggregateAt(activeRules, y, muOutputFn) {
   let maxVal = 0;
 
@@ -41,9 +37,7 @@ function aggregateAt(activeRules, y, muOutputFn) {
   return maxVal;
 }
 
-/**
- * Melakukan defuzzifikasi menggunakan metode Centroid (COA - Center of Area).
- */
+
 function defuzzify(activeRules, muOutputFn) {
   const { Y_MIN, Y_MAX, Y_STEP } = FUZZY_PARAMETERS;
 
@@ -57,15 +51,13 @@ function defuzzify(activeRules, muOutputFn) {
   }
 
   if (denominator === 0) {
-    return 4; // Kembalikan nilai tengah (Kategori C5 ekuivalen index y=4)
+    return 4; 
   }
 
   return numerator / denominator;
 }
 
-/**
- * Memetakan indeks defuzzifikasi y* ke kategori C1-C9 terdekat.
- */
+
 function lookupCategory(yStar) {
   let bestK   = 1;
   let minDist = Infinity;
@@ -81,9 +73,7 @@ function lookupCategory(yStar) {
   return bestK;
 }
 
-/**
- * Menjalankan inferensi fuzzy Mamdani secara dinamis berdasarkan parameter tanaman.
- */
+
 function runInference(x1, x2, plantParams) {
   if (typeof x1 !== 'number' || typeof x2 !== 'number') {
     throw new TypeError('Input x1 (pH) dan x2 (kelembaban) harus berupa angka.');
@@ -92,7 +82,7 @@ function runInference(x1, x2, plantParams) {
   const phClamped       = Math.max(0, Math.min(14, x1));
   const moistureClamped = Math.max(0, Math.min(100, x2));
 
-  // Membangun fungsi keanggotaan dinamis sesuai dengan parameter ideal tanaman terpilih
+  
   const { fuzzify, muOutput } = buildMembershipFunctions(plantParams);
 
   const membership  = fuzzify(phClamped, moistureClamped);

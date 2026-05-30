@@ -17,10 +17,10 @@ app.use("/api", apiRouter);
 
 app.get("/health", async (req, res) => {
   try {
-    // Ping PostgreSQL
+    
     await prisma.$queryRaw`SELECT 1`;
 
-    // Ping Redis
+    
     let redisStatus = "UNKNOWN";
     try {
       const redis = getRedisClient();

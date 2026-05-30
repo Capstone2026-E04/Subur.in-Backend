@@ -1,9 +1,6 @@
 const prisma = require('../database/connections/prisma_client');
 
-/**
- * GET /api/plants
- * Mengambil daftar tanaman yang tersedia dari database.
- */
+
 exports.getAllPlants = async (req, res) => {
   try {
     const plants = await prisma.plant.findMany({

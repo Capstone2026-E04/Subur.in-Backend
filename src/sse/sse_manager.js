@@ -8,7 +8,7 @@ function addClient(deviceId, res) {
   }
   clients.get(deviceId).add(res);
   console.log(
-    `[SSE] ➕ Client baru untuk device "${deviceId}". Total: ${clients.get(deviceId).size}`
+    `[SSE]  Client baru untuk device "${deviceId}". Total: ${clients.get(deviceId).size}`
   );
 }
 
@@ -19,7 +19,7 @@ function removeClient(deviceId, res) {
     clients.delete(deviceId);
   }
   console.log(
-    `[SSE] ➖ Client terputus dari device "${deviceId}".`
+    `[SSE]  Client terputus dari device "${deviceId}".`
   );
 }
 

@@ -3,17 +3,14 @@ const { getRedisClient } = require('../database/connections/redis');
 const { generateRecommendation } = require('../ai/services/recommendation.service');
 const { getLatestSensorData } = require('../repositories/sensor_redis_repository');
 const { getLatestSensorLog } = require('../repositories/sensor_repository');
+const { publishDeviceConfig } = require('../mqtt/publishers/config_publisher');
 
-/**
- * GET /api/devices/discovered
- * Mendeteksi secara dinamis device yang sedang aktif memancarkan data di Redis,
- * namun BELUM terdaftar di database Supabase (Unclaimed/Auto-Discovery).
- */
+
 exports.getDiscoveredDevices = async (req, res) => {
   try {
     const redis = getRedisClient();
 
-    // 1. Cari semua key di Redis yang mencatat data sensor terbaru dari device
+    
     const keys = await redis.keys('sensor:latest:*');
 
     if (keys.length === 0) {
@@ -24,7 +21,7 @@ exports.getDiscoveredDevices = async (req, res) => {
       });
     }
 
-    // 2. Ambil nilai telemetry (data sensor) untuk setiap device dari Redis
+    
     const activeDevices = [];
     for (const key of keys) {
       const rawData = await redis.get(key);
@@ -33,10 +30,10 @@ exports.getDiscoveredDevices = async (req, res) => {
       }
     }
 
-    // Ambil daftar deviceId yang sedang aktif di Redis
+    
     const activeDeviceIds = activeDevices.map(d => d.deviceId);
 
-    // 3. Cari device mana saja dari daftar aktif tersebut yang SUDAH terdaftar di database
+    
     const registeredDevices = await prisma.device.findMany({
       where: {
         id: { in: activeDeviceIds }
@@ -46,7 +43,7 @@ exports.getDiscoveredDevices = async (req, res) => {
 
     const registeredIds = new Set(registeredDevices.map(d => d.id));
 
-    // 4. Saring: Sisakan hanya device aktif yang BELUM terdaftar di database (Unclaimed)
+    
     const unclaimedDevices = activeDevices.filter(d => !registeredIds.has(d.deviceId));
 
     return res.status(200).json({
@@ -65,10 +62,7 @@ exports.getDiscoveredDevices = async (req, res) => {
   }
 };
 
-/**
- * POST /api/devices
- * Mendaftarkan (klaim) device baru yang terhubung ke akun user yang sedang login.
- */
+
 exports.registerDevice = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -81,7 +75,7 @@ exports.registerDevice = async (req, res) => {
       });
     }
 
-    // 1. Periksa apakah device dengan ID ini sudah terdaftar sebelumnya
+    
     const existingDevice = await prisma.device.findUnique({
       where: { id: deviceId }
     });
@@ -93,11 +87,11 @@ exports.registerDevice = async (req, res) => {
       });
     }
 
-    // 2. Hubungkan ke database dengan foreign keys yang valid
+    
     const newDevice = await prisma.device.create({
       data: {
-        id: deviceId, // Disimpan menggunakan deviceId dari ESP32 (misal: MAC Address)
-        userId: userId, // Diambil otomatis dari token autentikasi user
+        id: deviceId, 
+        userId: userId, 
         label: label.trim(),
         plantId: plantId,
         polybagId: polybagId,
@@ -127,10 +121,7 @@ exports.registerDevice = async (req, res) => {
   }
 };
 
-/**
- * GET /api/devices
- * Mengambil daftar seluruh device yang terdaftar atas nama user yang sedang login.
- */
+
 exports.getMyDevices = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -161,17 +152,14 @@ exports.getMyDevices = async (req, res) => {
   }
 };
 
-/**
- * PATCH /api/devices/:id
- * Memperbarui info device milik user yang sedang login (seperti ganti label, jenis tanaman, atau polybag).
- */
+
 exports.updateDevice = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
     const { label, plantId, polybagId, status } = req.body;
 
-    // Pastikan device tersebut ada dan memang milik user bersangkutan
+    
     const device = await prisma.device.findFirst({
       where: { id: id, userId: userId }
     });
@@ -215,16 +203,13 @@ exports.updateDevice = async (req, res) => {
   }
 };
 
-/**
- * DELETE /api/devices/:id
- * Menghapus/melepas (unclaim) device milik user secara permanen.
- */
+
 exports.deleteDevice = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
 
-    // Pastikan device tersebut ada dan memang milik user bersangkutan
+    
     const device = await prisma.device.findFirst({
       where: { id: id, userId: userId }
     });
@@ -255,16 +240,13 @@ exports.deleteDevice = async (req, res) => {
   }
 };
 
-/**
- * GET /api/devices/:id/recommendation
- * Menghasilkan rekomendasi fuzzy logic real-time untuk device berdasarkan data sensor terbaru.
- */
+
 exports.getDeviceRecommendation = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
 
-    // 1. Pastikan device tersebut ada dan memang milik user
+    
     const device = await prisma.device.findFirst({
       where: { id: id, userId: userId },
       include: {
@@ -280,7 +262,7 @@ exports.getDeviceRecommendation = async (req, res) => {
       });
     }
 
-    // 2. Ambil data sensor terbaru (Redis -> Database)
+    
     let sensorData = await getLatestSensorData(id);
     if (!sensorData) {
       const dbLog = await getLatestSensorLog(id);
@@ -301,7 +283,7 @@ exports.getDeviceRecommendation = async (req, res) => {
       });
     }
 
-    // 3. Jalankan mesin fuzzy logic untuk mendapatkan rekomendasi
+    
     const recommendation = await generateRecommendation({
       phValue: sensorData.ph,
       moistureValue: sensorData.moisture,
@@ -309,7 +291,7 @@ exports.getDeviceRecommendation = async (req, res) => {
       plantIdOrName: device.plantId
     });
 
-    // 4. Simpan log rekomendasi di database Supabase
+    
     const savedLog = await prisma.recommendationLog.create({
       data: {
         deviceId: id,
@@ -340,6 +322,59 @@ exports.getDeviceRecommendation = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Terjadi kesalahan saat menghasilkan rekomendasi.',
+      error: error.message
+    });
+  }
+};
+
+exports.sendDeviceConfig = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { delay_ms } = req.body;
+
+    if (delay_ms === undefined || delay_ms === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Field "delay_ms" wajib diisi.'
+      });
+    }
+
+    const parsedDelay = Number(delay_ms);
+    if (!Number.isInteger(parsedDelay) || parsedDelay < 100) {
+      return res.status(400).json({
+        success: false,
+        message: '"delay_ms" harus berupa bilangan bulat dan minimal 100 ms.'
+      });
+    }
+
+    const device = await prisma.device.findFirst({
+      where: { id, userId }
+    });
+
+    if (!device) {
+      return res.status(404).json({
+        success: false,
+        message: 'Device tidak ditemukan atau Anda tidak memiliki akses.'
+      });
+    }
+
+    const result = await publishDeviceConfig(id, parsedDelay);
+
+    return res.status(200).json({
+      success: true,
+      message: `Konfigurasi delay berhasil dikirim ke device "${id}".`,
+      data: {
+        deviceId: id,
+        topic: result.topic,
+        payload: result.payload
+      }
+    });
+  } catch (error) {
+    console.error('Send Device Config Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Terjadi kesalahan saat mengirim konfigurasi ke device.',
       error: error.message
     });
   }

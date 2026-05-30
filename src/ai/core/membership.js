@@ -1,7 +1,4 @@
-/**
- * Mesin Himpunan Keanggotaan Fuzzy (Membership Functions) - Dinamis
- * Dihasilkan secara dinamis berdasarkan parameter ideal tanaman yang dimuat dari database.
- */
+
 
 const DEFAULT_PLANT_PARAMS = {
   minPh: 6.0,
@@ -63,7 +60,7 @@ function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
     return 1;
   };
 
-  // ── 2. FUNGSI KEANGGOTAAN KELEMBABAN (VWC, %) ──────────────────────────────
+  
 
   const muKering = (x2) => {
     const t1 = minMoisture - 15;
@@ -104,13 +101,13 @@ function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
     return 1;
   };
 
-  // ── 3. FUNGSI KEANGGOTAAN OUTPUT (C1-C9) ───────────────────────────────────
+  
 
   const muOutput = (k, y) => {
     return Math.max(0, 1 - Math.abs(y - (k - 1)));
   };
 
-  // ── 4. PROSES FUZZIFIKASI INPUT ────────────────────────────────────────────
+  
 
   const fuzzify = (ph, moisture) => {
     return {
@@ -145,7 +142,7 @@ function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
   };
 }
 
-// Ekspor static fallback untuk kompatibilitas ke belakang (menggunakan parameter default)
+
 const defaultMfs = buildMembershipFunctions();
 
 module.exports = {

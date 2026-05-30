@@ -1,9 +1,6 @@
 const prisma = require('../database/connections/prisma_client');
 
-/**
- * GET /api/users/me
- * Mengambil data profil pengguna yang sedang login.
- */
+
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -43,10 +40,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-/**
- * PATCH /api/users/me
- * Memperbarui data profil pengguna (hanya field name dan avatarUrl yang diizinkan).
- */
+
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -106,10 +100,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-/**
- * DELETE /api/users/me
- * Menghapus akun pengguna yang sedang login secara permanen.
- */
+
 exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;

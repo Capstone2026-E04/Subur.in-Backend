@@ -40,7 +40,7 @@ async function getSensorHistory(deviceId, limit = 30) {
     orderBy: { timestamp: "desc" },
     take: limit,
   });
-  return logs.reverse(); // Balikkan agar berurutan kronologis (terlama -> terbaru) untuk grafik
+  return logs.reverse(); 
 }
 
 module.exports = {

@@ -18,7 +18,7 @@ async function setLatestSensorData(deviceId, ph, moisture) {
     });
     await redis.set(key, payload, "EX", SENSOR_TTL_SECONDS);
   } catch (err) {
-    console.error(`[Redis Cache] ⚠️ Gagal setLatestSensorData (Fallback aktif):`, err.message);
+    console.error(`[Redis Cache] ️ Gagal setLatestSensorData (Fallback aktif):`, err.message);
   }
 }
 
@@ -29,7 +29,7 @@ async function getLatestSensorData(deviceId) {
     const raw = await redis.get(key);
     return raw ? JSON.parse(raw) : null;
   } catch (err) {
-    console.error(`[Redis Cache] ⚠️ Gagal getLatestSensorData (Fallback aktif):`, err.message);
+    console.error(`[Redis Cache] ️ Gagal getLatestSensorData (Fallback aktif):`, err.message);
     return null;
   }
 }
@@ -47,7 +47,7 @@ async function shouldSaveToDatabase(deviceId) {
     await redis.set(key, "1", "EX", throttleSeconds);
     return true;
   } catch (err) {
-    console.error(`[Redis Cache] ⚠️ Gagal shouldSaveToDatabase (Fallback: izinkan simpan ke DB):`, err.message);
+    console.error(`[Redis Cache] ️ Gagal shouldSaveToDatabase (Fallback: izinkan simpan ke DB):`, err.message);
     return true;
   }
 }

@@ -5,10 +5,7 @@ require("dotenv").config();
 
 let client = null;
 
-/**
- * Menginisialisasi dan mengembalikan koneksi klien MQTT ke EMQX Cloud.
- * @returns {mqtt.MqttClient}
- */
+
 function connectMQTT() {
   if (client) return client;
 
@@ -29,30 +26,30 @@ function connectMQTT() {
     clean: true,
     reconnectPeriod: 5000,
     connectTimeout: 30000,
-    // EMQX Cloud menggunakan SSL/TLS publik.
-    // rejectUnauthorized: false menonaktifkan validasi berkas sertifikat lokal
-    // agar mudah terhubung di lingkungan development.
+    
+    
+    
     rejectUnauthorized: false 
   };
 
-  console.log(`[MQTT Client] 🔌 Mencoba terhubung ke EMQX Cloud di: ${brokerUrl}`);
+  console.log(`[MQTT Client]  Mencoba terhubung ke EMQX Cloud di: ${brokerUrl}`);
   
   client = mqtt.connect(brokerUrl, options);
 
   client.on("connect", () => {
-    console.log("[MQTT Client] 🚀 ✅ Terkoneksi dengan sukses ke EMQX Cloud!");
+    console.log("[MQTT Client]   Terkoneksi dengan sukses ke EMQX Cloud!");
   });
 
   client.on("error", (err) => {
-    console.error("[MQTT Client] ❌ Kesalahan koneksi MQTT:", err.message);
+    console.error("[MQTT Client]  Kesalahan koneksi MQTT:", err.message);
   });
 
   client.on("close", () => {
-    console.log("[MQTT Client] ⚠️ Koneksi MQTT terputus.");
+    console.log("[MQTT Client] ️ Koneksi MQTT terputus.");
   });
 
   client.on("reconnect", () => {
-    console.log("[MQTT Client] 🔄 Mencoba menyambungkan kembali ke broker...");
+    console.log("[MQTT Client]  Mencoba menyambungkan kembali ke broker...");
   });
 
   return client;

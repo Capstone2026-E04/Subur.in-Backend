@@ -1,9 +1,6 @@
 const prisma = require('../database/connections/prisma_client');
 
-/**
- * GET /api/polybags
- * Mengambil daftar polybag yang tersedia dari database beserta tipenya.
- */
+
 exports.getAllPolybags = async (req, res) => {
   try {
     const polybags = await prisma.polybag.findMany({
@@ -12,7 +9,7 @@ exports.getAllPolybags = async (req, res) => {
       }
     });
 
-    // Map ke format yang diekspektasi oleh frontend
+    
     const mappedPolybags = polybags.map(pb => ({
       id: pb.id,
       name: pb.polybagType.name,

@@ -1,8 +1,7 @@
+const prisma = require('../database/connections/prisma_client');
 const { generateRecommendation } = require('../ai/services/recommendation.service');
 
-/**
- * Menyimulasikan logika fuzzy berdasarkan input pH, kelembaban, tipe polybag, dan tipe tanaman dari database.
- */
+
 exports.simulateRecommendation = async (req, res) => {
   try {
     const { phValue, moistureValue, polybagPreset, plantIdOrName } = req.body;
@@ -56,6 +55,65 @@ exports.simulateRecommendation = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Gagal menjalankan simulasi fuzzy logic.',
+      error: error.message
+    });
+  }
+};
+
+exports.getRecommendationHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { deviceId } = req.query;
+
+    if (deviceId) {
+      const device = await prisma.device.findFirst({
+        where: { id: deviceId, userId }
+      });
+      if (!device) {
+        return res.status(404).json({
+          success: false,
+          message: 'Device tidak ditemukan atau Anda tidak memiliki akses.'
+        });
+      }
+    }
+
+    const logs = await prisma.recommendationLog.findMany({
+      where: {
+        device: {
+          userId,
+          ...(deviceId ? { id: deviceId } : {})
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        device: {
+          select: {
+            id: true,
+            label: true,
+            plant: {
+              select: {
+                name: true,
+                scientificName: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Riwayat rekomendasi berhasil diambil.',
+      data: { logs }
+    });
+
+  } catch (error) {
+    console.error('Get Recommendation History Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Gagal mengambil riwayat rekomendasi.',
       error: error.message
     });
   }

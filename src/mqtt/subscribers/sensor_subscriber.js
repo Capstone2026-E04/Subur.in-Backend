@@ -19,13 +19,13 @@ function registerSensorSubscriber(mqttClient) {
   mqttClient.subscribe(SENSOR_TOPIC, { qos: 1 }, (err) => {
     if (err) {
       console.error(
-        `[MQTT Subscriber] ❌ Gagal subscribe ke topic "${SENSOR_TOPIC}":`,
+        `[MQTT Subscriber]  Gagal subscribe ke topic "${SENSOR_TOPIC}":`,
         err.message
       );
       return;
     }
     console.log(
-      `[MQTT Subscriber] ✅ Subscribe berhasil ke topic: "${SENSOR_TOPIC}"`
+      `[MQTT Subscriber]  Subscribe berhasil ke topic: "${SENSOR_TOPIC}"`
     );
   });
 
@@ -35,7 +35,7 @@ function registerSensorSubscriber(mqttClient) {
     const deviceId = extractDeviceId(topic);
     if (!deviceId) {
       console.warn(
-        `[MQTT Subscriber] ⚠️  Tidak bisa ekstrak deviceId dari topic: ${topic}`
+        `[MQTT Subscriber] ️  Tidak bisa ekstrak deviceId dari topic: ${topic}`
       );
       return;
     }
@@ -45,7 +45,7 @@ function registerSensorSubscriber(mqttClient) {
       data = JSON.parse(payload.toString());
     } catch {
       console.error(
-        `[MQTT Subscriber] ❌ Payload bukan JSON valid dari device "${deviceId}":`,
+        `[MQTT Subscriber]  Payload bukan JSON valid dari device "${deviceId}":`,
         payload.toString()
       );
       return;
@@ -56,14 +56,14 @@ function registerSensorSubscriber(mqttClient) {
 
     if (!isValidSensorValue(ph, "ph") || !isValidSensorValue(moisture, "moisture")) {
       console.warn(
-        `[MQTT Subscriber] ⚠️  Nilai sensor tidak valid dari device "${deviceId}":`,
+        `[MQTT Subscriber] ️  Nilai sensor tidak valid dari device "${deviceId}":`,
         data
       );
       return;
     }
 
     console.log(
-      `[MQTT Subscriber] 📥 Data diterima | Device: ${deviceId} | pH: ${ph} | Moisture: ${moisture}%`
+      `[MQTT Subscriber]  Data diterima | Device: ${deviceId} | pH: ${ph} | Moisture: ${moisture}%`
     );
 
     try {
@@ -80,7 +80,7 @@ function registerSensorSubscriber(mqttClient) {
       const device = await findDeviceById(deviceId);
       if (!device) {
         console.warn(
-          `[MQTT Subscriber] ⚠️  Device "${deviceId}" tidak ditemukan di database. Data Redis disimpan, Postgres diabaikan.`
+          `[MQTT Subscriber] ️  Device "${deviceId}" tidak ditemukan di database. Data Redis disimpan, Postgres diabaikan.`
         );
         return;
       }
@@ -90,12 +90,12 @@ function registerSensorSubscriber(mqttClient) {
         await saveRawSensorLog(deviceId, ph, moisture);
         await updateDeviceLastSeen(deviceId);
         console.log(
-          `[MQTT Subscriber] 💾 Data sensor disimpan ke Postgres | Device: ${deviceId}`
+          `[MQTT Subscriber]  Data sensor disimpan ke Postgres | Device: ${deviceId}`
         );
       }
     } catch (err) {
       console.error(
-        `[MQTT Subscriber] ❌ Error saat memproses data dari device "${deviceId}":`,
+        `[MQTT Subscriber]  Error saat memproses data dari device "${deviceId}":`,
         err.message
       );
     }

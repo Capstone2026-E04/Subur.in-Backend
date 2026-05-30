@@ -54,7 +54,7 @@ exports.getLatestSensor = async (req, res) => {
     }
     return res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error("[Sensor Controller] ❌ Error getLatestSensor:", err.message);
+    console.error("[Sensor Controller]  Error getLatestSensor:", err.message);
     return res.status(500).json({
       success: false,
       message: "Gagal mengambil data sensor.",
@@ -80,7 +80,7 @@ exports.getSensorHistory = async (req, res) => {
       lastError = err;
       if (i < retries - 1) {
         console.warn(
-          `[Prisma History Query] ⚠️ Gagal mengambil riwayat (percobaan ke-${i + 1}/${retries}). Mencoba kembali dalam ${delay}ms...`
+          `[Prisma History Query] ️ Gagal mengambil riwayat (percobaan ke-${i + 1}/${retries}). Mencoba kembali dalam ${delay}ms...`
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
@@ -94,7 +94,7 @@ exports.getSensorHistory = async (req, res) => {
     });
   }
 
-  console.error("[Sensor Controller] ❌ Error getSensorHistory:", lastError.message);
+  console.error("[Sensor Controller]  Error getSensorHistory:", lastError.message);
   return res.status(500).json({
     success: false,
     message: "Gagal mengambil riwayat sensor setelah beberapa percobaan.",

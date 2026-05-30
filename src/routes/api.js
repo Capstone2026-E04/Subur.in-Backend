@@ -6,6 +6,7 @@ const sensorRoutes = require('./sensor.routes');
 const deviceRoutes = require('./device.routes');
 const plantRoutes = require('./plant.routes');
 const polybagRoutes = require('./polybag.routes');
+const recommendationRoutes = require('./recommendation.routes');
 
 router.get('/', (req, res) => {
   res.status(200).json({
@@ -24,12 +25,17 @@ router.get('/', (req, res) => {
         update: 'PATCH /api/devices/:id',
         delete: 'DELETE /api/devices/:id',
         recommendation: 'GET /api/devices/:id/recommendation',
+        sendConfig: 'POST /api/devices/:id/config',
       },
       plants: {
         list: 'GET /api/plants',
       },
       polybags: {
         list: 'GET /api/polybags',
+      },
+      recommendations: {
+        history: 'GET /api/recommendations',
+        simulate: 'POST /api/recommendations/simulate',
       },
       sensors: {
         stream: 'GET /api/sensors/:deviceId/stream',
@@ -45,6 +51,7 @@ router.use('/devices', deviceRoutes);
 router.use('/sensors', sensorRoutes);
 router.use('/plants', plantRoutes);
 router.use('/polybags', polybagRoutes);
+router.use('/recommendations', recommendationRoutes);
 
 module.exports = router;
 

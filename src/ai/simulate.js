@@ -27,13 +27,13 @@ async function startSimulation() {
     });
 
     if (plants.length === 0) {
-      console.log('❌ Tidak ada data tanaman di database. Harap jalankan seeder terlebih dahulu.');
+      console.log(' Tidak ada data tanaman di database. Harap jalankan seeder terlebih dahulu.');
       rl.close();
       return;
     }
 
     if (polybags.length === 0) {
-      console.log('❌ Tidak ada data polybag di database. Harap jalankan seeder terlebih dahulu.');
+      console.log(' Tidak ada data polybag di database. Harap jalankan seeder terlebih dahulu.');
       rl.close();
       return;
     }
@@ -41,7 +41,7 @@ async function startSimulation() {
     const phInput = await askQuestion('Masukkan nilai pH tanah (0.0 - 14.0): ');
     const ph = parseFloat(phInput);
     if (isNaN(ph) || ph < 0 || ph > 14) {
-      console.log('❌ Nilai pH tidak valid. Harap masukkan angka antara 0.0 - 14.0.');
+      console.log(' Nilai pH tidak valid. Harap masukkan angka antara 0.0 - 14.0.');
       rl.close();
       return;
     }
@@ -49,7 +49,7 @@ async function startSimulation() {
     const moistureInput = await askQuestion('Masukkan nilai kelembaban tanah % (0 - 100): ');
     const moisture = parseFloat(moistureInput);
     if (isNaN(moisture) || moisture < 0 || moisture > 100) {
-      console.log('❌ Nilai kelembaban tidak valid. Harap masukkan angka antara 0 - 100.');
+      console.log(' Nilai kelembaban tidak valid. Harap masukkan angka antara 0 - 100.');
       rl.close();
       return;
     }
@@ -62,13 +62,13 @@ async function startSimulation() {
     const plantIndex = parseInt(plantChoiceInput) - 1;
 
     if (isNaN(plantIndex) || plantIndex < 0 || plantIndex >= plants.length) {
-      console.log('❌ Pilihan tanaman tidak valid.');
+      console.log(' Pilihan tanaman tidak valid.');
       rl.close();
       return;
     }
 
     const selectedPlant = plants[plantIndex];
-    console.log(`✅ Tanaman terpilih: ${selectedPlant.name}`);
+    console.log(` Tanaman terpilih: ${selectedPlant.name}`);
 
     console.log('\nPilih Penggunaan Polybag (Wajib):');
     polybags.forEach((polybag, index) => {
@@ -78,15 +78,15 @@ async function startSimulation() {
     const polybagIndex = parseInt(polybagChoiceInput) - 1;
 
     if (isNaN(polybagIndex) || polybagIndex < 0 || polybagIndex >= polybags.length) {
-      console.log('❌ Pilihan polybag tidak valid.');
+      console.log(' Pilihan polybag tidak valid.');
       rl.close();
       return;
     }
 
     const selectedPolybag = polybags[polybagIndex];
-    console.log(`✅ Polybag terpilih: ${selectedPolybag.polybagType.name} (${selectedPolybag.soilVolumeLiter}L)`);
+    console.log(` Polybag terpilih: ${selectedPolybag.polybagType.name} (${selectedPolybag.soilVolumeLiter}L)`);
 
-    console.log('\n⏳ Menghitung rekomendasi menggunakan Fuzzy Inference System...');
+    console.log('\nMenghitung rekomendasi menggunakan Fuzzy Inference System...');
     const result = await generateRecommendation({
       phValue: ph,
       moistureValue: moisture,
@@ -109,14 +109,19 @@ async function startSimulation() {
     console.log(`Tindakan          : ${result.actionText}`);
     console.log('----------------------------------------------------');
     console.log('DOSIS REKOMENDASI:');
-    console.log(`💧 Volume Air     : ${result.waterVolumeLiter} Liter`);
-    console.log(`⚪ Dosis Kapur    : ${result.limeDosageGram} Gram`);
-    console.log(`🟡 Dosis Sulfur   : ${result.sulfurDosageGram} Gram`);
-    console.log(`⚠️ Kurangi Air?   : ${result.reduceWatering ? 'YA' : 'TIDAK'}`);
+    console.log(` Volume Air     : ${result.waterVolumeLiter} Liter`);
+    console.log(` Dosis Kapur    : ${result.limeDosageGram} Gram`);
+    console.log(` Dosis Sulfur   : ${result.sulfurDosageGram} Gram`);
+    console.log(` Kurangi Air?   : ${result.reduceWatering ? 'YA' : 'TIDAK'}`);
     console.log('====================================================');
 
   } catch (error) {
-    console.error('❌ Terjadi kesalahan selama simulasi:', error.message);
+    console.error(' Terjadi kesalahan selama simulasi:', error.message);
+    if (error.message.includes("Can't reach database server") || error.code === 'P1001') {
+      console.error('\n Hubungan ke database gagal.');
+      console.error(' Pastikan database Supabase Anda sedang aktif (tidak dalam status paused/ditangguhkan).');
+      console.error(' Buka dashboard Supabase Anda dan aktifkan kembali jika diperlukan.');
+    }
   } finally {
     await prisma.$disconnect();
     rl.close();

@@ -2,12 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Memulai proses seeding database Subur.in...');
+  console.log(' Memulai proses seeding database Subur.in...');
 
-  console.log('🧹 Membersihkan data tanaman lama (jika ada)...');
+  console.log(' Membersihkan data tanaman lama (jika ada)...');
   await prisma.plant.deleteMany({});
 
-  console.log('📌 Memasukkan data tanaman default...');
+  console.log(' Memasukkan data tanaman default...');
   const plants = [
     {
       name: 'Bayam',
@@ -48,14 +48,14 @@ async function main() {
     const createdPlant = await prisma.plant.create({
       data: plant
     });
-    console.log(`✅ Berhasil membuat tanaman: ${createdPlant.name}`);
+    console.log(` Berhasil membuat tanaman: ${createdPlant.name}`);
   }
 
-  console.log('🧹 Membersihkan data polybag lama (jika ada)...');
+  console.log(' Membersihkan data polybag lama (jika ada)...');
   await prisma.polybag.deleteMany({});
   await prisma.polybagType.deleteMany({});
 
-  console.log('📌 Memasukkan tipe polybag default...');
+  console.log(' Memasukkan tipe polybag default...');
   const polybagTypes = [
     {
       name: 'Standar',
@@ -75,10 +75,10 @@ async function main() {
       data: type
     });
     createdTypes[createdType.name.toLowerCase()] = createdType;
-    console.log(`✅ Berhasil membuat tipe polybag: ${createdType.name} (Dia: ${createdType.diameter}cm, T: ${createdType.height}cm)`);
+    console.log(` Berhasil membuat tipe polybag: ${createdType.name} (Dia: ${createdType.diameter}cm, T: ${createdType.height}cm)`);
   }
 
-  console.log('📌 Memasukkan data polybag (penggunaan) default...');
+  console.log(' Memasukkan data polybag (penggunaan) default...');
   const polybags = [
     {
       polybagTypeId: createdTypes['standar'].id,
@@ -95,15 +95,15 @@ async function main() {
       data: polybag,
       include: { polybagType: true }
     });
-    console.log(`✅ Berhasil membuat polybag: ${createdPolybag.polybagType.name} dengan Volume Tanah ${createdPolybag.soilVolumeLiter}L`);
+    console.log(` Berhasil membuat polybag: ${createdPolybag.polybagType.name} dengan Volume Tanah ${createdPolybag.soilVolumeLiter}L`);
   }
 
-  console.log('✨ Proses seeding database selesai dengan sukses!');
+  console.log(' Proses seeding database selesai dengan sukses!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Terjadi error saat seeding:', e);
+    console.error(' Terjadi error saat seeding:', e);
     process.exit(1);
   })
   .finally(async () => {

@@ -3,7 +3,7 @@ const { generateRecommendation } = require('../services/recommendation.service')
 const prisma = require('../../database/connections/prisma_client');
 
 async function runTests() {
-  console.log('🧪 Memulai Pengujian Unit Modul Rekomendasi (Database-Only)...');
+  console.log(' Memulai Pengujian Unit Modul Rekomendasi (Database-Only)...');
 
   try {
     const dbPolybags = await prisma.polybag.findMany({
@@ -19,7 +19,7 @@ async function runTests() {
     });
 
     if (dbPolybags.length === 0 || !targetPlant) {
-      console.log('⚠️ Skip Pengujian: Pastikan database telah di-seed dengan benar ("node prisma/seed.js").');
+      console.log('️ Skip Pengujian: Pastikan database telah di-seed dengan benar ("node prisma/seed.js").');
       await prisma.$disconnect();
       return;
     }
@@ -41,7 +41,7 @@ async function runTests() {
 
     const expectedArea = Math.PI * Math.pow((targetPolybag.polybagType.diameter / 2) / 100, 2);
     assert.strictEqual(resultPolybag._debug.areaM2, parseFloat(expectedArea.toFixed(5)));
-    console.log('✅ Test 1 Berhasil: Sukses memuat spesifikasi polybag secara dinamis menggunakan UUID.');
+    console.log(' Test 1 Berhasil: Sukses memuat spesifikasi polybag secara dinamis menggunakan UUID.');
 
     console.log('\n2. Menguji Integrasi Parameter Dinamis Tanaman (Selada)...');
     const resultPlant = await generateRecommendation({
@@ -59,11 +59,11 @@ async function runTests() {
 
     const expectedLimeDosage = parseFloat((150.0 * targetPolybag.soilVolumeLiter * 0.9).toFixed(2));
     assert.strictEqual(resultPlant.limeDosageGram, expectedLimeDosage);
-    console.log(`✅ Test 2 Berhasil: Target pH dinamis Selada (${expectedPhTarget}) & target kelembaban (${expectedThetaTarget}) terhitung serta diaplikasikan dalam rumus dosis kapur (${expectedLimeDosage}g) secara tepat.`);
+    console.log(` Test 2 Berhasil: Target pH dinamis Selada (${expectedPhTarget}) & target kelembaban (${expectedThetaTarget}) terhitung serta diaplikasikan dalam rumus dosis kapur (${expectedLimeDosage}g) secara tepat.`);
 
-    console.log('\n✨ SEMUA PENGUJIAN UNIT DATABASE-ONLY BERHASIL DILAKUKAN! ✨');
+    console.log('\n SEMUA PENGUJIAN UNIT DATABASE-ONLY BERHASIL DILAKUKAN! ');
   } catch (error) {
-    console.error('\n❌ Terjadi kesalahan saat pengujian:', error);
+    console.error('\n Terjadi kesalahan saat pengujian:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
