@@ -65,12 +65,12 @@ async function generateRecommendation({ phValue, moistureValue, polybagPreset, p
   }
 
   if (interpretation.needsLime) {
-    limeDetail       = calculateLimeDosage(phValue, preset.areaM2, phTarget);
+    limeDetail       = calculateLimeDosage(phValue, preset.volumeLiter, phTarget);
     limeDosageGram   = limeDetail.limeDosageGram;
   }
 
   if (interpretation.needsSulfur) {
-    sulfurDetail      = calculateSulfurDosage(phValue, preset.areaM2, phTarget);
+    sulfurDetail      = calculateSulfurDosage(phValue, preset.volumeLiter, phTarget);
     sulfurDosageGram  = sulfurDetail.sulfurDosageGram;
   }
 

@@ -74,7 +74,7 @@ function runInference(x1, x2) {
     throw new TypeError('Input x1 (pH) dan x2 (kelembaban) harus berupa angka.');
   }
 
-  const phClamped       = Math.max(4, Math.min(9, x1));
+  const phClamped       = Math.max(0, Math.min(14, x1));
   const moistureClamped = Math.max(0, Math.min(100, x2));
 
   const membership  = fuzzify(phClamped, moistureClamped);

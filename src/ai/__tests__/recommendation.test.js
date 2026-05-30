@@ -57,7 +57,7 @@ async function runTests() {
     assert.strictEqual(resultPlant._debug.phTarget, expectedPhTarget);
     assert.strictEqual(resultPlant._debug.thetaTarget, expectedThetaTarget);
 
-    const expectedLimeDosage = parseFloat((150.0 * expectedArea * 0.9).toFixed(2));
+    const expectedLimeDosage = parseFloat((150.0 * targetPolybag.soilVolumeLiter * 0.9).toFixed(2));
     assert.strictEqual(resultPlant.limeDosageGram, expectedLimeDosage);
     console.log(`✅ Test 2 Berhasil: Target pH dinamis Selada (${expectedPhTarget}) & target kelembaban (${expectedThetaTarget}) terhitung serta diaplikasikan dalam rumus dosis kapur (${expectedLimeDosage}g) secara tepat.`);
 

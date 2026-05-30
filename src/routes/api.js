@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const authRoutes = require('./auth.routes');
 const userRoutes = require('./user.routes');
+const sensorRoutes = require('./sensor.routes');
+const deviceRoutes = require('./device.routes');
+const plantRoutes = require('./plant.routes');
+const polybagRoutes = require('./polybag.routes');
 
 router.get('/', (req, res) => {
   res.status(200).json({
@@ -13,12 +17,34 @@ router.get('/', (req, res) => {
         getProfile: 'GET /api/users/me',
         updateProfile: 'PATCH /api/users/me',
         deleteAccount: 'DELETE /api/users/me',
-      }
+      },
+      devices: {
+        register: 'POST /api/devices',
+        list: 'GET /api/devices',
+        update: 'PATCH /api/devices/:id',
+        delete: 'DELETE /api/devices/:id',
+        recommendation: 'GET /api/devices/:id/recommendation',
+      },
+      plants: {
+        list: 'GET /api/plants',
+      },
+      polybags: {
+        list: 'GET /api/polybags',
+      },
+      sensors: {
+        stream: 'GET /api/sensors/:deviceId/stream',
+        latest: 'GET /api/sensors/:deviceId/latest',
+      },
     }
   });
 });
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/devices', deviceRoutes);
+router.use('/sensors', sensorRoutes);
+router.use('/plants', plantRoutes);
+router.use('/polybags', polybagRoutes);
 
 module.exports = router;
+

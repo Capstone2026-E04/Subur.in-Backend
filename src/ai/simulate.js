@@ -38,10 +38,10 @@ async function startSimulation() {
       return;
     }
 
-    const phInput = await askQuestion('Masukkan nilai pH tanah (4.0 - 9.0): ');
+    const phInput = await askQuestion('Masukkan nilai pH tanah (0.0 - 14.0): ');
     const ph = parseFloat(phInput);
-    if (isNaN(ph) || ph < 4.0 || ph > 9.0) {
-      console.log('❌ Nilai pH tidak valid. Harap masukkan angka antara 4.0 - 9.0.');
+    if (isNaN(ph) || ph < 0 || ph > 14) {
+      console.log('❌ Nilai pH tidak valid. Harap masukkan angka antara 0.0 - 14.0.');
       rl.close();
       return;
     }

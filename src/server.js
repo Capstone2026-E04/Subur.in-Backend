@@ -2,7 +2,10 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const prisma = require("./database/connections/prisma_client");
+const { getRedisClient } = require("./database/connections/redis");
 const apiRouter = require("./routes/api");
+const { connectMQTT } = require("./mqtt/connection");
+const { registerSensorSubscriber } = require("./mqtt/subscribers/sensor_subscriber");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,12 +17,27 @@ app.use("/api", apiRouter);
 
 app.get("/health", async (req, res) => {
   try {
+    // Ping PostgreSQL
     await prisma.$queryRaw`SELECT 1`;
+
+    // Ping Redis
+    let redisStatus = "UNKNOWN";
+    try {
+      const redis = getRedisClient();
+      const pingResult = await redis.ping();
+      redisStatus = pingResult === "PONG" ? "CONNECTED" : "UNHEALTHY";
+    } catch (redisErr) {
+      redisStatus = `ERROR: ${redisErr.message}`;
+    }
 
     return res.status(200).json({
       status: "UP",
+      database: "CONNECTED",
+      redis: redisStatus,
       message:
-        "Server Subur.in-Backend berjalan normal dan terkoneksi ke Supabase!",
+        redisStatus === "CONNECTED"
+          ? "Server Subur.in-Backend berjalan normal dan terkoneksi ke Supabase & Redis!"
+          : "Server berjalan normal, terkoneksi ke Supabase, namun bermasalah dengan Redis.",
       timestamp: new Date(),
     });
   } catch (error) {
@@ -41,4 +59,23 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
+
+  try {
+    getRedisClient();
+    console.log("[Redis] Inisialisasi Redis dimulai...");
+  } catch (err) {
+    console.error("[Redis] Gagal menginisialisasi Redis:", err.message);
+  }
+
+  try {
+    const mqttClient = connectMQTT();
+
+    mqttClient.on("connect", () => {
+      registerSensorSubscriber(mqttClient);
+    });
+
+    console.log("[MQTT] Inisialisasi MQTT dimulai...");
+  } catch (err) {
+    console.error("[MQTT] Gagal menginisialisasi MQTT:", err.message);
+  }
 });

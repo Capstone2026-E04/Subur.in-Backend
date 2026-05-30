@@ -44,7 +44,7 @@ function muSedang(x2) {
   return 0;
 }
 
-function muLembab(x2) {
+function muLembap(x2) {
   if (x2 <= 55) return 0;
   if (x2 <= 70) return (x2 - 55) / (70 - 55);
   if (x2 <= 85) return (85 - x2) / (85 - 70);
@@ -58,22 +58,7 @@ function muJenuh(x2) {
 }
 
 function muOutput(k, y) {
-  const center = k - 1;
-
-  if (k === 1) {
-    if (y <= 0) return 1;
-    if (y <= 1) return 1 - y;
-    return 0;
-  }
-
-  if (k === 9) {
-    if (y >= 8) return 1;
-    if (y >= 7) return y - 7;
-    return 0;
-  }
-
-  const val = 1 - Math.abs(y - center);
-  return Math.max(0, val);
+  return Math.max(0, 1 - Math.abs(y - (k - 1)));
 }
 
 function fuzzify(x1, x2) {
@@ -88,7 +73,7 @@ function fuzzify(x1, x2) {
     moisture: {
       kering: muKering(x2),
       sedang: muSedang(x2),
-      lembab: muLembab(x2),
+      lembap: muLembap(x2),
       jenuh:  muJenuh(x2),
     },
   };
@@ -102,7 +87,7 @@ module.exports = {
   muSangatBasa,
   muKering,
   muSedang,
-  muLembab,
+  muLembap,
   muJenuh,
   muOutput,
   fuzzify,
