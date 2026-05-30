@@ -10,31 +10,37 @@ async function main() {
   console.log('📌 Memasukkan data tanaman default...');
   const plants = [
     {
-      name: 'Pakcoy',
-      scientificName: 'Brassica rapa L. var. chinensis',
-      description: 'Sayuran daun populer dari keluarga kubis-kubisan (Brassicaceae). Sangat cocok untuk sistem urban farming skala kecil.',
+      name: 'Bayam',
+      scientificName: 'Spinacia oleracea',
+      description: 'Sayuran hijau kaya zat besi dan vitamin. Memiliki sensitivitas tinggi terhadap genangan air serta tanah masam.',
       minPh: 6.0,
       maxPh: 7.0,
-      minMoisture: 60.0,
+      phTarget: 6.5,
+      minMoisture: 30.0,
       maxMoisture: 80.0,
+      targetMoisture: 65.0,
+    },
+    {
+      name: 'Pakcoy',
+      scientificName: 'Brassica rapa subsp. chinensis',
+      description: 'Sayuran daun populer dengan sistem perakaran dangkal yang menyukai media lembab tapi berdrainase baik.',
+      minPh: 6.0,
+      maxPh: 7.5,
+      phTarget: 6.8,
+      minMoisture: 35.0,
+      maxMoisture: 85.0,
+      targetMoisture: 70.0,
     },
     {
       name: 'Selada',
-      scientificName: 'Lactuca sativa L.',
-      description: 'Sayuran berdaun longgar yang kaya vitamin. Membutuhkan aerasi tanah baik dengan kelembaban sedang.',
+      scientificName: 'Lactuca sativa',
+      description: 'Sayuran daun yang sangat sensitif terhadap cekaman kekeringan. Memerlukan kelembaban konstan di atas ambang MAD.',
       minPh: 6.0,
       maxPh: 6.8,
-      minMoisture: 60.0,
+      phTarget: 6.5,
+      minMoisture: 25.0,
       maxMoisture: 75.0,
-    },
-    {
-      name: 'Bayam',
-      scientificName: 'Amaranthus tricolor L.',
-      description: 'Sayuran hijau cepat panen dengan kandungan zat besi tinggi. Relatif toleran terhadap berbagai jenis media tanam.',
-      minPh: 6.0,
-      maxPh: 7.0,
-      minMoisture: 50.0,
-      maxMoisture: 70.0,
+      targetMoisture: 60.0,
     }
   ];
 

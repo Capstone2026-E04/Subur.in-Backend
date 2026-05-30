@@ -45,10 +45,19 @@ async function generateRecommendation({ phValue, moistureValue, polybagPreset, p
     throw new Error(`Data tanaman dengan identitas "${plantIdOrName}" tidak ditemukan di database.`);
   }
 
-  const phTarget = (plant.minPh + plant.maxPh) / 2;
-  const thetaTarget = ((plant.minMoisture + plant.maxMoisture) / 2) / 100;
+  const phTarget = plant.phTarget;
+  const thetaTarget = plant.targetMoisture / 100;
 
-  const inference = runInference(phValue, moistureValue);
+  const plantParams = {
+    minPh: plant.minPh,
+    maxPh: plant.maxPh,
+    phTarget: plant.phTarget,
+    minMoisture: plant.minMoisture,
+    maxMoisture: plant.maxMoisture,
+    targetMoisture: plant.targetMoisture
+  };
+
+  const inference = runInference(phValue, moistureValue, plantParams);
 
   const interpretation = interpretCategory(inference.categoryCode);
 
@@ -60,7 +69,7 @@ async function generateRecommendation({ phValue, moistureValue, polybagPreset, p
   let sulfurDetail     = null;
 
   if (interpretation.needsWater) {
-    waterDetail       = calculateWaterVolume(moistureValue, preset.volumeLiter, thetaTarget);
+    waterDetail       = calculateWaterVolume(moistureValue, preset.volumeLiter, plant.targetMoisture);
     waterVolumeLiter  = waterDetail.waterVolumeLiter;
   }
 
