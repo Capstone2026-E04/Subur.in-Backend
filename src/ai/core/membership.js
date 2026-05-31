@@ -10,74 +10,78 @@ const DEFAULT_PLANT_PARAMS = {
 };
 
 function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
+  const params = { ...DEFAULT_PLANT_PARAMS, ...plantParams };
+  const minPh = params.minPh;
+  const maxPh = params.maxPh;
+
   const muSangatAsam = (x1) => {
-    if (x1 <= 4.5) return 1;
-    if (x1 <= 5.5) return (5.5 - x1) / (5.5 - 4.5);
+    if (x1 <= minPh - 1.5) return 1;
+    if (x1 <= minPh - 0.5) return (minPh - 0.5 - x1) / 1.0;
     return 0;
   };
 
   const muAsam = (x1) => {
-    if (x1 <= 4.5) return 0;
-    if (x1 <= 5.5) return (x1 - 4.5) / (5.5 - 4.5);
-    if (x1 <= 6.5) return (6.5 - x1) / (6.5 - 5.5);
+    if (x1 <= minPh - 1.5) return 0;
+    if (x1 <= minPh - 0.5) return (x1 - (minPh - 1.5)) / 1.0;
+    if (x1 <= minPh) return (minPh - x1) / 0.5;
     return 0;
   };
 
   const muOptimal = (x1) => {
-    if (x1 <= 5.5) return 0;
-    if (x1 <= 6.5) return (x1 - 5.5) / (6.5 - 5.5);
-    if (x1 <= 7.5) return (7.5 - x1) / (7.5 - 6.5);
+    if (x1 <= minPh - 0.5) return 0;
+    if (x1 <= minPh) return (x1 - (minPh - 0.5)) / 0.5;
+    if (x1 <= maxPh) return 1;
+    if (x1 <= maxPh + 0.5) return (maxPh + 0.5 - x1) / 0.5;
     return 0;
   };
 
   const muBasa = (x1) => {
-    if (x1 <= 7.0) return 0;
-    if (x1 <= 7.5) return (x1 - 7.0) / (7.5 - 7.0);
-    if (x1 <= 8.5) return (8.5 - x1) / (8.5 - 7.5);
+    if (x1 <= maxPh) return 0;
+    if (x1 <= maxPh + 0.5) return (x1 - maxPh) / 0.5;
+    if (x1 <= maxPh + 1.5) return (maxPh + 1.5 - x1) / 1.0;
     return 0;
   };
 
   const muSangatBasa = (x1) => {
-    if (x1 <= 7.5) return 0;
-    if (x1 <= 8.5) return (x1 - 7.5) / (8.5 - 7.5);
+    if (x1 <= maxPh + 0.5) return 0;
+    if (x1 <= maxPh + 1.5) return (x1 - (maxPh + 0.5)) / 1.0;
     return 1;
   };
 
-  const muKering = (x2) => {
-    if (x2 <= 20) return 1;
-    if (x2 <= 30) return (30 - x2) / (30 - 20);
+  const muKering = (theta) => {
+    if (theta <= 0.15) return 1;
+    if (theta <= 0.25) return (0.25 - theta) / 0.10;
     return 0;
   };
 
-  const muSedang = (x2) => {
-    if (x2 <= 25) return 0;
-    if (x2 <= 42.5) return (x2 - 25) / (42.5 - 25);
-    if (x2 <= 60) return (60 - x2) / (60 - 42.5);
+  const muSedang = (theta) => {
+    if (theta <= 0.15) return 0;
+    if (theta <= 0.25) return (theta - 0.15) / 0.10;
+    if (theta <= 0.30) return (0.30 - theta) / 0.05;
     return 0;
   };
 
-  const muLembap = (x2) => {
-    if (x2 <= 55) return 0;
-    if (x2 <= 70) return (x2 - 55) / (70 - 55);
-    if (x2 <= 85) return (85 - x2) / (85 - 70);
+
+  const muLembap = (theta) => {
+    if (theta <= 0.25) return 0;
+    if (theta <= 0.30) return (theta - 0.25) / 0.05;
+    if (theta <= 0.35) return 1;
+    if (theta <= 0.40) return (0.40 - theta) / 0.05;
     return 0;
   };
 
-  const muJenuh = (x2) => {
-    if (x2 <= 80) return 0;
-    if (x2 <= 90) return (x2 - 80) / (90 - 80);
+  const muJenuh = (theta) => {
+    if (theta <= 0.35) return 0;
+    if (theta <= 0.40) return (theta - 0.35) / 0.05;
     return 1;
   };
-
-  
 
   const muOutput = (k, y) => {
     return Math.max(0, 1 - Math.abs(y - (k - 1)));
   };
 
-  
-
-  const fuzzify = (ph, moisture) => {
+  const fuzzify = (ph, moisturePercent) => {
+    const theta = moisturePercent / 100;
     return {
       ph: {
         sangatAsam: muSangatAsam(ph),
@@ -87,10 +91,10 @@ function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
         sangatBasa: muSangatBasa(ph),
       },
       moisture: {
-        kering: muKering(moisture),
-        sedang: muSedang(moisture),
-        lembap: muLembap(moisture),
-        jenuh:  muJenuh(moisture),
+        kering: muKering(theta),
+        sedang: muSedang(theta),
+        lembap: muLembap(theta),
+        jenuh:  muJenuh(theta),
       },
     };
   };
@@ -109,6 +113,7 @@ function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
     fuzzify,
   };
 }
+
 
 
 const defaultMfs = buildMembershipFunctions();

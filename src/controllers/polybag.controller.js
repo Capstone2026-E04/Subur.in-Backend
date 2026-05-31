@@ -13,7 +13,9 @@ exports.getAllPolybags = async (req, res) => {
     const mappedPolybags = polybags.map(pb => ({
       id: pb.id,
       name: pb.polybagType.name,
-      size: `${pb.soilVolumeLiter}L (${pb.polybagType.diameter}x${pb.polybagType.height}cm)`
+      diameter: pb.polybagType.diameter,
+      height: pb.polybagType.height,
+      soilVolumeLiter: pb.soilVolumeLiter
     }));
 
     return res.status(200).json({

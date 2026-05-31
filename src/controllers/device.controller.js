@@ -66,7 +66,7 @@ exports.getDiscoveredDevices = async (req, res) => {
 exports.registerDevice = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { deviceId, label, plantId, polybagId } = req.body;
+    const { deviceId, label, plantId, polybagId, sensorInterval } = req.body;
 
     if (!deviceId || !label || !plantId || !polybagId) {
       return res.status(400).json({
@@ -95,7 +95,8 @@ exports.registerDevice = async (req, res) => {
         label: label.trim(),
         plantId: plantId,
         polybagId: polybagId,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        sensorInterval: sensorInterval !== undefined ? Number(sensorInterval) : 15
       },
       include: {
         plant: true,
@@ -103,6 +104,11 @@ exports.registerDevice = async (req, res) => {
           include: { polybagType: true }
         }
       }
+    });
+
+    const intervalMin = sensorInterval !== undefined ? Number(sensorInterval) : 15;
+    publishDeviceConfig(deviceId, intervalMin).catch(err => {
+      console.error(`[MQTT Publish] Gagal mengirim config awal saat registrasi device:`, err.message);
     });
 
     return res.status(201).json({
@@ -157,7 +163,7 @@ exports.updateDevice = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { label, plantId, polybagId, status } = req.body;
+    const { label, plantId, polybagId, status, sensorInterval } = req.body;
 
     
     const device = await prisma.device.findFirst({
@@ -177,7 +183,8 @@ exports.updateDevice = async (req, res) => {
         label: label !== undefined ? label.trim() : device.label,
         plantId: plantId !== undefined ? plantId : device.plantId,
         polybagId: polybagId !== undefined ? polybagId : device.polybagId,
-        status: status !== undefined ? status : device.status
+        status: status !== undefined ? status : device.status,
+        sensorInterval: sensorInterval !== undefined ? Number(sensorInterval) : device.sensorInterval
       },
       include: {
         plant: true,
@@ -186,6 +193,15 @@ exports.updateDevice = async (req, res) => {
         }
       }
     });
+
+    console.log(`[Update Device] Menghitung status MQTT config | sensorInterval di body: ${sensorInterval} (Number: ${Number(sensorInterval)}), db lama: ${device.sensorInterval}`);
+    if (sensorInterval !== undefined && Number(sensorInterval) !== device.sensorInterval) {
+      const intervalMin = Number(sensorInterval);
+      console.log(`[Update Device] Mengirim data interval baru ke MQTT: ${intervalMin} menit`);
+      publishDeviceConfig(id, intervalMin).catch(err => {
+        console.error(`[MQTT Publish] Gagal mengirim config saat update device:`, err.message);
+      });
+    }
 
     return res.status(200).json({
       success: true,

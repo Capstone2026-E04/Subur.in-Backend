@@ -7,6 +7,7 @@ const deviceRoutes = require('./device.routes');
 const plantRoutes = require('./plant.routes');
 const polybagRoutes = require('./polybag.routes');
 const recommendationRoutes = require('./recommendation.routes');
+const notificationRoutes = require('./notification.routes');
 
 router.get('/', (req, res) => {
   res.status(200).json({
@@ -52,6 +53,7 @@ router.use('/sensors', sensorRoutes);
 router.use('/plants', plantRoutes);
 router.use('/polybags', polybagRoutes);
 router.use('/recommendations', recommendationRoutes);
+router.use('/notifications', notificationRoutes);
 
 module.exports = router;
 

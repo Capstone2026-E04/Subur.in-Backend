@@ -1,24 +1,22 @@
 const { K_L_LIME, M_L_MAX_PER_LITER, PH_TOLERANCE } = require('../config/treatment_constants');
 
 
-function calculateLimeDosage(phValue, volumeLiter, targetPh) {
-  if (typeof phValue !== 'number' || typeof volumeLiter !== 'number' || typeof targetPh !== 'number') {
+function calculateLimeDosage(phValue, volumeLiter, targetPh, minPh) {
+  if (typeof phValue !== 'number' || typeof volumeLiter !== 'number' || typeof targetPh !== 'number' || typeof minPh !== 'number') {
     throw new TypeError('Semua parameter input kalkulator kapur harus berupa angka.');
   }
 
-  const phDeficit = targetPh - phValue;
-
-  
-  if (phDeficit <= PH_TOLERANCE) {
+  if (phValue >= minPh - PH_TOLERANCE) {
     return {
       limeDosageGram: 0,
-      phDeficit:      parseFloat(Math.max(0, phDeficit).toFixed(3)),
+      phDeficit:      parseFloat(Math.max(0, targetPh - phValue).toFixed(3)),
       phTarget:       targetPh,
       kL:             K_L_LIME,
       cappedByMax:    false,
     };
   }
 
+  const phDeficit   = targetPh - phValue;
   const rawDosage   = K_L_LIME * volumeLiter * phDeficit;
   const maxDosage   = M_L_MAX_PER_LITER * volumeLiter;
   const finalDosage = Math.min(rawDosage, maxDosage);
@@ -34,3 +32,4 @@ function calculateLimeDosage(phValue, volumeLiter, targetPh) {
 }
 
 module.exports = { calculateLimeDosage };
+

@@ -1,4 +1,4 @@
-const { V_MAX_FRACTION } = require('../config/treatment_constants');
+const { V_MAX_FRACTION, THETA_TARGET } = require('../config/treatment_constants');
 
 
 function calculateWaterVolume(moisturePercent, volumeLiter, targetMoisturePercent) {
@@ -6,7 +6,7 @@ function calculateWaterVolume(moisturePercent, volumeLiter, targetMoisturePercen
     throw new TypeError('Semua parameter input kalkulator air harus berupa angka.');
   }
 
-  const thetaTarget = targetMoisturePercent / 100;
+  const thetaTarget = THETA_TARGET !== undefined ? THETA_TARGET : (targetMoisturePercent / 100);
   const theta      = moisturePercent / 100;
 
   const rawVolume  = Math.max(0, (thetaTarget - theta) * volumeLiter);
@@ -23,3 +23,4 @@ function calculateWaterVolume(moisturePercent, volumeLiter, targetMoisturePercen
 }
 
 module.exports = { calculateWaterVolume };
+

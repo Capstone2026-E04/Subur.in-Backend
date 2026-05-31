@@ -5,6 +5,7 @@ async function main() {
   console.log(' Memulai proses seeding database Subur.in...');
 
   console.log(' Membersihkan data tanaman lama (jika ada)...');
+  await prisma.device.deleteMany({});
   await prisma.plant.deleteMany({});
 
   console.log(' Memasukkan data tanaman default...');
@@ -58,12 +59,12 @@ async function main() {
   console.log(' Memasukkan tipe polybag default...');
   const polybagTypes = [
     {
-      name: 'Standar',
+      name: 'Kecil',
       diameter: 20.0,
       height: 25.0,
     },
     {
-      name: 'Besar',
+      name: 'Standar',
       diameter: 25.0,
       height: 25.0,
     }
@@ -81,11 +82,11 @@ async function main() {
   console.log(' Memasukkan data polybag (penggunaan) default...');
   const polybags = [
     {
-      polybagTypeId: createdTypes['standar'].id,
+      polybagTypeId: createdTypes['kecil'].id,
       soilVolumeLiter: 7.1,
     },
     {
-      polybagTypeId: createdTypes['besar'].id,
+      polybagTypeId: createdTypes['standar'].id,
       soilVolumeLiter: 11.0,
     }
   ];

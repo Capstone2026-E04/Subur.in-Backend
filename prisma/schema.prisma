@@ -31,13 +31,15 @@ model Device {
   status     DeviceStatus @default(ACTIVE)
   lastSeenAt DateTime?    @map("last_seen_at")
   createdAt  DateTime     @default(now()) @map("created_at")
-  updatedAt  DateTime     @updatedAt @map("updated_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  sensorInterval Int          @default(15) @map("sensor_interval")
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plant   Plant   @relation(fields: [plantId], references: [id], onDelete: Restrict)
   polybag Polybag @relation(fields: [polybagId], references: [id], onDelete: Restrict)
 
   recommendations RecommendationLog[]
+  notifications   Notification[]
 
   @@map("devices")
 }
@@ -127,4 +129,18 @@ enum DeviceStatus {
   OFFLINE
 
   @@map("device_status")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  deviceId  String   @map("device_id") @db.VarChar(50)
+  title     String   @db.VarChar(100)
+  message   String   @db.Text
+  type      String   @db.VarChar(20) // "warning", "success", "info"
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

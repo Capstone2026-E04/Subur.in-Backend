@@ -54,6 +54,18 @@ class UpstashRedisAdapter {
     return await this.client.keys(pattern);
   }
 
+  async del(...keys) {
+    return await this.client.del(...keys);
+  }
+
+  async setex(key, seconds, value) {
+    return await this.set(key, value, "EX", seconds);
+  }
+
+  async incr(key) {
+    return await this.client.incr(key);
+  }
+
   on(event, callback) {
     if (event === "connect") {
       setTimeout(() => callback(), 0);

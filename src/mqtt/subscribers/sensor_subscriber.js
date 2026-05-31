@@ -14,6 +14,7 @@ const {
 const { broadcastToDevice } = require("../../sse/sse_manager");
 const prisma = require("../../database/connections/prisma_client");
 const { generateRecommendation } = require("../../ai/services/recommendation.service");
+const { getRedisClient } = require("../../database/connections/redis");
 
 const SENSOR_TOPIC = "suburin/devices/+/telemetry";
 
@@ -61,6 +62,32 @@ function registerSensorSubscriber(mqttClient) {
         `[MQTT Subscriber] ️  Nilai sensor tidak valid dari device "${deviceId}":`,
         data
       );
+      try {
+        const redis = getRedisClient();
+        const invalidNotifiedKey = `sensor:invalid_notified:${deviceId}`;
+        const alreadyNotified = await redis.get(invalidNotifiedKey);
+        if (!alreadyNotified) {
+          await prisma.notification.create({
+            data: {
+              deviceId,
+              title: "Data Sensor Tidak Valid",
+              message: "Data sensor tidak valid. Periksa sensor, daya, atau koneksi.",
+              type: "warning",
+            }
+          });
+          await redis.setex(invalidNotifiedKey, 3600, "1"); // Lock 1 jam
+        }
+      } catch (err) {
+        console.error("[MQTT Subscriber] Gagal menyimpan notifikasi data tidak valid:", err.message);
+      }
+      broadcastToDevice(deviceId, {
+        type: "NOTIFICATION",
+        notification: {
+          title: "Data Sensor Tidak Valid",
+          message: "Data sensor tidak valid. Periksa sensor, daya, atau koneksi.",
+          type: "warning",
+        }
+      });
       return;
     }
 
@@ -79,12 +106,163 @@ function registerSensorSubscriber(mqttClient) {
       };
       broadcastToDevice(deviceId, sensorPayload);
 
-      const device = await findDeviceById(deviceId);
+      const device = await prisma.device.findUnique({
+        where: { id: deviceId },
+        include: { plant: true }
+      });
       if (!device) {
         console.warn(
           `[MQTT Subscriber] ️  Device "${deviceId}" tidak ditemukan di database. Data Redis disimpan, Postgres diabaikan.`
         );
         return;
+      }
+
+      try {
+        const recommendation = await generateRecommendation({
+          phValue: ph,
+          moistureValue: moisture,
+          polybagPreset: device.polybagId,
+          plantIdOrName: device.plantId
+        });
+
+        await prisma.recommendationLog.create({
+          data: {
+            deviceId: deviceId,
+            phValue: ph,
+            moistureValue: moisture,
+            fuzzyIndex: recommendation.fuzzyIndex,
+            categoryCode: recommendation.categoryCode,
+            actionText: recommendation.actionText,
+            waterVolumeLiter: recommendation.waterVolumeLiter,
+            limeDosageGram: recommendation.limeDosageGram,
+            sulfurDosageGram: recommendation.sulfurDosageGram,
+            reduceWatering: recommendation.reduceWatering
+          }
+        });
+        console.log(
+          `[MQTT Subscriber]  Recommendation log disimpan ke Postgres | Device: ${deviceId}`
+        );
+
+        // --- SISTEM NOTIFIKASI DASHBOARD & REALTIME BROWSER ---
+        const redis = getRedisClient();
+        const dryKey = `sensor:consecutive_dry:${deviceId}`;
+        const wetKey = `sensor:consecutive_wet:${deviceId}`;
+        const offlineNotifiedKey = `sensor:offline_notified:${deviceId}`;
+        const invalidNotifiedKey = `sensor:invalid_notified:${deviceId}`;
+        const phAcidNotifiedKey = `sensor:ph_acid_notified:${deviceId}`;
+        const phAlkalineNotifiedKey = `sensor:ph_alkaline_notified:${deviceId}`;
+
+        // Hapus status offline/invalid jika ada data valid yang masuk
+        await redis.del(offlineNotifiedKey);
+        await redis.del(invalidNotifiedKey);
+
+        // 1. Pengecekan Kelembapan (Persisten minimal 2x berturut-turut untuk meredam noise)
+        if (moisture < 25) {
+          const dryCount = await redis.incr(dryKey);
+          await redis.del(wetKey);
+          if (dryCount >= 2) {
+            if (dryCount === 2) {
+              await prisma.notification.create({
+                data: {
+                  deviceId,
+                  title: "Media Kering",
+                  message: `Media kering. Siram sekitar ${Math.round(recommendation.waterVolumeLiter * 1000)} mL.`,
+                  type: "warning",
+                }
+              });
+            }
+            broadcastToDevice(deviceId, {
+              type: "NOTIFICATION",
+              notification: {
+                title: "Media Kering",
+                message: `Media kering. Siram sekitar ${Math.round(recommendation.waterVolumeLiter * 1000)} mL.`,
+                type: "warning",
+              }
+            });
+          }
+        } else if (moisture > 35) {
+          const wetCount = await redis.incr(wetKey);
+          await redis.del(dryKey);
+          if (wetCount >= 2) {
+            if (wetCount === 2) {
+              await prisma.notification.create({
+                data: {
+                  deviceId,
+                  title: "Media Terlalu Basah",
+                  message: "Media terlalu basah. Hentikan penyiraman sementara dan cek drainase.",
+                  type: "warning",
+                }
+              });
+            }
+            broadcastToDevice(deviceId, {
+              type: "NOTIFICATION",
+              notification: {
+                title: "Media Terlalu Basah",
+                message: "Media terlalu basah. Hentikan penyiraman sementara dan cek drainase.",
+                type: "warning",
+              }
+            });
+          }
+        } else {
+          await redis.del(dryKey);
+          await redis.del(wetKey);
+        }
+
+        // 2. Pengecekan pH (Langsung trigger ketika keluar dari rentang toleransi)
+        const minPh = device.plant.minPh;
+        const maxPh = device.plant.maxPh;
+
+        if (ph < minPh - 0.2) {
+          const alreadyNotified = await redis.get(phAcidNotifiedKey);
+          if (!alreadyNotified) {
+            await prisma.notification.create({
+              data: {
+                deviceId,
+                title: "pH Terlalu Asam",
+                message: `pH terlalu asam. Tambahkan kapur/dolomit sekitar ${Math.round(recommendation.limeDosageGram)} gram.`,
+                type: "warning",
+              }
+            });
+            await redis.setex(phAcidNotifiedKey, 3600, "1"); // Lock 1 jam
+          }
+          broadcastToDevice(deviceId, {
+            type: "NOTIFICATION",
+            notification: {
+              title: "pH Terlalu Asam",
+              message: `pH terlalu asam. Tambahkan kapur/dolomit sekitar ${Math.round(recommendation.limeDosageGram)} gram.`,
+              type: "warning",
+            }
+          });
+        } else if (ph > maxPh + 0.2) {
+          const alreadyNotified = await redis.get(phAlkalineNotifiedKey);
+          if (!alreadyNotified) {
+            await prisma.notification.create({
+              data: {
+                deviceId,
+                title: "pH Terlalu Basa",
+                message: `pH terlalu basa. Tambahkan sulfur elemental sekitar ${Math.round(recommendation.sulfurDosageGram)} gram.`,
+                type: "warning",
+              }
+            });
+            await redis.setex(phAlkalineNotifiedKey, 3600, "1"); // Lock 1 jam
+          }
+          broadcastToDevice(deviceId, {
+            type: "NOTIFICATION",
+            notification: {
+              title: "pH Terlalu Basa",
+              message: `pH terlalu basa. Tambahkan sulfur elemental sekitar ${Math.round(recommendation.sulfurDosageGram)} gram.`,
+              type: "warning",
+            }
+          });
+        } else {
+          await redis.del(phAcidNotifiedKey);
+          await redis.del(phAlkalineNotifiedKey);
+        }
+      } catch (recErr) {
+        console.error(
+          `[MQTT Subscriber] ️ Gagal membuat/menyimpan rekomendasi otomatis untuk device "${deviceId}":`,
+          recErr.message
+        );
       }
 
       const allowWrite = await shouldSaveToDatabase(deviceId);
@@ -94,38 +272,6 @@ function registerSensorSubscriber(mqttClient) {
         console.log(
           `[MQTT Subscriber]  Data sensor disimpan ke Postgres | Device: ${deviceId}`
         );
-
-        try {
-          const recommendation = await generateRecommendation({
-            phValue: ph,
-            moistureValue: moisture,
-            polybagPreset: device.polybagId,
-            plantIdOrName: device.plantId
-          });
-
-          await prisma.recommendationLog.create({
-            data: {
-              deviceId: deviceId,
-              phValue: ph,
-              moistureValue: moisture,
-              fuzzyIndex: recommendation.fuzzyIndex,
-              categoryCode: recommendation.categoryCode,
-              actionText: recommendation.actionText,
-              waterVolumeLiter: recommendation.waterVolumeLiter,
-              limeDosageGram: recommendation.limeDosageGram,
-              sulfurDosageGram: recommendation.sulfurDosageGram,
-              reduceWatering: recommendation.reduceWatering
-            }
-          });
-          console.log(
-            `[MQTT Subscriber]  Recommendation log disimpan ke Postgres | Device: ${deviceId}`
-          );
-        } catch (recErr) {
-          console.error(
-            `[MQTT Subscriber] ️ Gagal membuat/menyimpan rekomendasi otomatis untuk device "${deviceId}":`,
-            recErr.message
-          );
-        }
       }
     } catch (err) {
       console.error(

@@ -5,7 +5,7 @@ const { connectMQTT } = require("../connection");
 const CONFIG_TOPIC_PREFIX = "suburin/devices";
 const CONFIG_TOPIC_SUFFIX = "config";
 
-function publishDeviceConfig(deviceId, delayMs) {
+function publishDeviceConfig(deviceId, readingIntervalMin) {
   return new Promise((resolve, reject) => {
     const client = connectMQTT();
 
@@ -14,7 +14,7 @@ function publishDeviceConfig(deviceId, delayMs) {
     }
 
     const topic = `${CONFIG_TOPIC_PREFIX}/${deviceId}/${CONFIG_TOPIC_SUFFIX}`;
-    const payload = JSON.stringify({ delay_ms: delayMs });
+    const payload = JSON.stringify({ reading_interval_min: readingIntervalMin });
 
     client.publish(topic, payload, { qos: 1, retain: false }, (err) => {
       if (err) {
@@ -26,9 +26,9 @@ function publishDeviceConfig(deviceId, delayMs) {
       }
 
       console.log(
-        `[MQTT Publisher] Config berhasil dikirim ke device "${deviceId}" | Topic: ${topic} | delay_ms: ${delayMs}`
+        `[MQTT Publisher] Config berhasil dikirim ke device "${deviceId}" | Topic: ${topic} | reading_interval_min: ${readingIntervalMin}`
       );
-      resolve({ topic, payload: { delay_ms: delayMs } });
+      resolve({ topic, payload: { reading_interval_min: readingIntervalMin } });
     });
   });
 }
