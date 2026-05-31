@@ -9,7 +9,7 @@ function calculateLimeDosage(phValue, volumeLiter, targetPh) {
   const phDeficit = targetPh - phValue;
 
   
-  if (phDeficit < PH_TOLERANCE) {
+  if (phDeficit <= PH_TOLERANCE) {
     return {
       limeDosageGram: 0,
       phDeficit:      parseFloat(Math.max(0, phDeficit).toFixed(3)),

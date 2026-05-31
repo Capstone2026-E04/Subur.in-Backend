@@ -10,94 +10,62 @@ const DEFAULT_PLANT_PARAMS = {
 };
 
 function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {
-  const { minPh, maxPh, minMoisture, maxMoisture, targetMoisture } = plantParams;
-
   const muSangatAsam = (x1) => {
-    const t1 = minPh - 1.5;
-    const t2 = minPh - 0.5;
-    if (x1 <= t1) return 1;
-    if (x1 <= t2) return (t2 - x1) / (t2 - t1);
+    if (x1 <= 4.5) return 1;
+    if (x1 <= 5.5) return (5.5 - x1) / (5.5 - 4.5);
     return 0;
   };
 
   const muAsam = (x1) => {
-    const t1 = minPh - 1.5;
-    const t2 = minPh - 0.5;
-    const t3 = minPh + 0.5;
-    if (x1 <= t1) return 0;
-    if (x1 <= t2) return (x1 - t1) / (t2 - t1);
-    if (x1 <= t3) return (t3 - x1) / (t3 - t2);
+    if (x1 <= 4.5) return 0;
+    if (x1 <= 5.5) return (x1 - 4.5) / (5.5 - 4.5);
+    if (x1 <= 6.5) return (6.5 - x1) / (6.5 - 5.5);
     return 0;
   };
 
   const muOptimal = (x1) => {
-    const t1 = minPh - 0.5;
-    const t2 = minPh;
-    const t3 = maxPh;
-    const t4 = maxPh + 0.5;
-    if (x1 <= t1) return 0;
-    if (x1 <= t2) return (x1 - t1) / (t2 - t1);
-    if (x1 <= t3) return 1;
-    if (x1 <= t4) return (t4 - x1) / (t4 - t3);
+    if (x1 <= 5.5) return 0;
+    if (x1 <= 6.5) return (x1 - 5.5) / (6.5 - 5.5);
+    if (x1 <= 7.5) return (7.5 - x1) / (7.5 - 6.5);
     return 0;
   };
 
   const muBasa = (x1) => {
-    const t1 = maxPh - 0.5;
-    const t2 = maxPh + 0.5;
-    const t3 = maxPh + 1.5;
-    if (x1 <= t1) return 0;
-    if (x1 <= t2) return (x1 - t1) / (t2 - t1);
-    if (x1 <= t3) return (t3 - x1) / (t3 - t2);
+    if (x1 <= 7.0) return 0;
+    if (x1 <= 7.5) return (x1 - 7.0) / (7.5 - 7.0);
+    if (x1 <= 8.5) return (8.5 - x1) / (8.5 - 7.5);
     return 0;
   };
 
   const muSangatBasa = (x1) => {
-    const t1 = maxPh + 0.5;
-    const t2 = maxPh + 1.5;
-    if (x1 <= t1) return 0;
-    if (x1 <= t2) return (x1 - t1) / (t2 - t1);
+    if (x1 <= 7.5) return 0;
+    if (x1 <= 8.5) return (x1 - 7.5) / (8.5 - 7.5);
     return 1;
   };
 
-  
-
   const muKering = (x2) => {
-    const t1 = minMoisture - 15;
-    const t2 = minMoisture;
-    if (x2 <= t1) return 1;
-    if (x2 <= t2) return (t2 - x2) / (t2 - t1);
+    if (x2 <= 20) return 1;
+    if (x2 <= 30) return (30 - x2) / (30 - 20);
     return 0;
   };
 
-  const peakSedang = (minMoisture + maxMoisture) / 2 - 10;
   const muSedang = (x2) => {
-    const t1 = minMoisture - 15;
-    const t2 = peakSedang;
-    const t3 = targetMoisture;
-    if (x2 <= t1) return 0;
-    if (x2 <= t2) return (x2 - t1) / (t2 - t1);
-    if (x2 <= t3) return (t3 - x2) / (t3 - t2);
+    if (x2 <= 25) return 0;
+    if (x2 <= 42.5) return (x2 - 25) / (42.5 - 25);
+    if (x2 <= 60) return (60 - x2) / (60 - 42.5);
     return 0;
   };
 
   const muLembap = (x2) => {
-    const t1 = peakSedang;
-    const t2 = targetMoisture - 5;
-    const t3 = targetMoisture + 5;
-    const t4 = maxMoisture;
-    if (x2 <= t1) return 0;
-    if (x2 <= t2) return (x2 - t1) / (t2 - t1);
-    if (x2 <= t3) return 1;
-    if (x2 <= t4) return (t4 - x2) / (t4 - t3);
+    if (x2 <= 55) return 0;
+    if (x2 <= 70) return (x2 - 55) / (70 - 55);
+    if (x2 <= 85) return (85 - x2) / (85 - 70);
     return 0;
   };
 
   const muJenuh = (x2) => {
-    const t1 = maxMoisture;
-    const t2 = maxMoisture + 5;
-    if (x2 <= t1) return 0;
-    if (x2 <= t2) return (x2 - t1) / (t2 - t1);
+    if (x2 <= 80) return 0;
+    if (x2 <= 90) return (x2 - 80) / (90 - 80);
     return 1;
   };
 

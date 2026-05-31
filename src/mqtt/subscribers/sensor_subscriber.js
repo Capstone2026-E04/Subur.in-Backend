@@ -12,6 +12,8 @@ const {
 } = require("../../repositories/sensor_redis_repository");
 
 const { broadcastToDevice } = require("../../sse/sse_manager");
+const prisma = require("../../database/connections/prisma_client");
+const { generateRecommendation } = require("../../ai/services/recommendation.service");
 
 const SENSOR_TOPIC = "suburin/devices/+/telemetry";
 
@@ -92,6 +94,38 @@ function registerSensorSubscriber(mqttClient) {
         console.log(
           `[MQTT Subscriber]  Data sensor disimpan ke Postgres | Device: ${deviceId}`
         );
+
+        try {
+          const recommendation = await generateRecommendation({
+            phValue: ph,
+            moistureValue: moisture,
+            polybagPreset: device.polybagId,
+            plantIdOrName: device.plantId
+          });
+
+          await prisma.recommendationLog.create({
+            data: {
+              deviceId: deviceId,
+              phValue: ph,
+              moistureValue: moisture,
+              fuzzyIndex: recommendation.fuzzyIndex,
+              categoryCode: recommendation.categoryCode,
+              actionText: recommendation.actionText,
+              waterVolumeLiter: recommendation.waterVolumeLiter,
+              limeDosageGram: recommendation.limeDosageGram,
+              sulfurDosageGram: recommendation.sulfurDosageGram,
+              reduceWatering: recommendation.reduceWatering
+            }
+          });
+          console.log(
+            `[MQTT Subscriber]  Recommendation log disimpan ke Postgres | Device: ${deviceId}`
+          );
+        } catch (recErr) {
+          console.error(
+            `[MQTT Subscriber] ️ Gagal membuat/menyimpan rekomendasi otomatis untuk device "${deviceId}":`,
+            recErr.message
+          );
+        }
       }
     } catch (err) {
       console.error(

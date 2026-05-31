@@ -82,11 +82,11 @@ async function main() {
   const polybags = [
     {
       polybagTypeId: createdTypes['standar'].id,
-      soilVolumeLiter: 5.0,
+      soilVolumeLiter: 7.1,
     },
     {
       polybagTypeId: createdTypes['besar'].id,
-      soilVolumeLiter: 10.0,
+      soilVolumeLiter: 11.0,
     }
   ];
 

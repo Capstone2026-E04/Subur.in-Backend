@@ -9,7 +9,7 @@ function calculateSulfurDosage(phValue, volumeLiter, targetPh) {
   const phExcess = phValue - targetPh;
 
   
-  if (phExcess < PH_TOLERANCE) {
+  if (phExcess <= PH_TOLERANCE) {
     return {
       sulfurDosageGram:          0,
       phExcess:                  parseFloat(Math.max(0, phExcess).toFixed(3)),
