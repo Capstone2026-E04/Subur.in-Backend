@@ -4,9 +4,9 @@ const DEFAULT_PLANT_PARAMS = {
   minPh: 6.0,
   maxPh: 7.0,
   phTarget: 6.5,
-  minMoisture: 30.0,
-  maxMoisture: 80.0,
-  targetMoisture: 65.0,
+  minMoisture: 20.0,
+  maxMoisture: 40.0,
+  targetMoisture: 30.0,
 };
 
 function buildMembershipFunctions(plantParams = DEFAULT_PLANT_PARAMS) {

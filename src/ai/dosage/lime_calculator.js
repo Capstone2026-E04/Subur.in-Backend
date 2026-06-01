@@ -18,16 +18,15 @@ function calculateLimeDosage(phValue, volumeLiter, targetPh, minPh) {
 
   const phDeficit   = targetPh - phValue;
   const rawDosage   = K_L_LIME * volumeLiter * phDeficit;
-  const maxDosage   = M_L_MAX_PER_LITER * volumeLiter;
-  const finalDosage = Math.min(rawDosage, maxDosage);
+  const finalDosage = rawDosage;
 
   return {
     limeDosageGram: parseFloat(finalDosage.toFixed(2)),
     phDeficit:      parseFloat(phDeficit.toFixed(3)),
     phTarget:       targetPh,
     kL:             K_L_LIME,
-    maxDosage:      parseFloat(maxDosage.toFixed(2)),
-    cappedByMax:    rawDosage > maxDosage,
+    maxDosage:      null,
+    cappedByMax:    false,
   };
 }
 

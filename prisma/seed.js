@@ -19,7 +19,7 @@ async function main() {
       phTarget: 6.5,
       minMoisture: 30.0,
       maxMoisture: 80.0,
-      targetMoisture: 65.0,
+      targetMoisture: 30.0,
     },
     {
       name: 'Pakcoy',
@@ -30,18 +30,18 @@ async function main() {
       phTarget: 6.8,
       minMoisture: 35.0,
       maxMoisture: 85.0,
-      targetMoisture: 70.0,
+      targetMoisture: 30.0,
     },
     {
       name: 'Selada',
       scientificName: 'Lactuca sativa',
       description: 'Sayuran daun yang sangat sensitif terhadap cekaman kekeringan. Memerlukan kelembaban konstan di atas ambang MAD.',
       minPh: 6.0,
-      maxPh: 6.8,
+      maxPh: 6.7,
       phTarget: 6.5,
       minMoisture: 25.0,
       maxMoisture: 75.0,
-      targetMoisture: 60.0,
+      targetMoisture: 30.0,
     }
   ];
 
@@ -83,11 +83,11 @@ async function main() {
   const polybags = [
     {
       polybagTypeId: createdTypes['kecil'].id,
-      soilVolumeLiter: 7.1,
+      soilVolumeLiter: 7.07,
     },
     {
       polybagTypeId: createdTypes['standar'].id,
-      soilVolumeLiter: 11.0,
+      soilVolumeLiter: 11.04,
     }
   ];
 

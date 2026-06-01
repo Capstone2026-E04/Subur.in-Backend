@@ -52,12 +52,12 @@ async function runTests() {
     });
 
     const expectedPhTarget = 6.5;
-    const expectedThetaTarget = 0.60;
+    const expectedThetaTarget = 0.30;
 
     assert.strictEqual(resultPlant._debug.phTarget, expectedPhTarget);
     assert.strictEqual(resultPlant._debug.thetaTarget, expectedThetaTarget);
 
-    const expectedLimeDosage = parseFloat((2.0 * targetPolybag.soilVolumeLiter * 1.0).toFixed(2));
+    const expectedLimeDosage = parseFloat((1.3 * targetPolybag.soilVolumeLiter * 1.0).toFixed(2));
     assert.strictEqual(resultPlant.limeDosageGram, expectedLimeDosage);
     console.log(` Test 2 Berhasil: Target pH dinamis Selada (${expectedPhTarget}) & target kelembaban (${expectedThetaTarget}) terhitung serta diaplikasikan dalam rumus dosis kapur (${expectedLimeDosage}g) secara tepat.`);
 

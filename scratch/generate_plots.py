@@ -131,8 +131,8 @@ ax1.grid(True, linestyle='--', alpha=0.6)
 ax1.legend(loc='upper right', frameon=True, facecolor='white', edgecolor='#BDC3C7', fontsize=10)
 
 plt.tight_layout()
-fig1.savefig('scratch/membership_ph.png', bbox_inches='tight')
-print("Grafik 'membership_ph.png' berhasil dibuat di folder scratch.")
+fig1.savefig('scratch/bab4_membership_ph_bayam.png', bbox_inches='tight')
+print("Grafik 'bab4_membership_ph_bayam.png' berhasil dibuat di folder scratch.")
 
 # Plot 2: Moisture Membership Functions
 fig2, ax2 = plt.subplots(figsize=(10, 6), dpi=300)
@@ -155,5 +155,5 @@ ax2.grid(True, linestyle='--', alpha=0.6)
 ax2.legend(loc='upper right', frameon=True, facecolor='white', edgecolor='#BDC3C7', fontsize=10)
 
 plt.tight_layout()
-fig2.savefig('scratch/membership_moisture.png', bbox_inches='tight')
-print("Grafik 'membership_moisture.png' berhasil dibuat di folder scratch.")
+fig2.savefig('scratch/bab4_membership_moisture_vwc.png', bbox_inches='tight')
+print("Grafik 'bab4_membership_moisture_vwc.png' berhasil dibuat di folder scratch.")

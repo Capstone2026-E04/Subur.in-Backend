@@ -30,7 +30,8 @@ function aggregateAt(activeRules, y, muOutputFn) {
   let maxVal = 0;
 
   for (const rule of activeRules) {
-    const clipped = Math.min(rule.alpha, muOutputFn(rule.outputCategory, y));
+    const outputVal = muOutputFn ? muOutputFn(rule.outputCategory, y) : Math.max(0, 1 - Math.abs(y - (rule.outputCategory - 1)));
+    const clipped = Math.min(rule.alpha, outputVal);
     if (clipped > maxVal) maxVal = clipped;
   }
 

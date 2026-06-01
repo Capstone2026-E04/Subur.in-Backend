@@ -40,7 +40,7 @@ async function getPhysicalPreset(presetNameOrId) {
   const heightCm = polybag.polybagType.height;
   const hFillCm = heightCm - 2.5;
   const areaM2 = Math.PI * Math.pow((diameterCm / 2) / 100, 2);
-  const volumeLiter = polybag.soilVolumeLiter;
+  const volumeLiter = parseFloat((areaM2 * (hFillCm / 100) * 1000).toFixed(2));
 
   return {
     id: polybag.id,

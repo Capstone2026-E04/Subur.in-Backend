@@ -49,6 +49,7 @@ Desktop.ini
 *.tsbuildinfo
 
 # Misc
-.eslintcache
+.eslintcache``
 
 scratch/
+scratch
