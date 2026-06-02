@@ -17,9 +17,6 @@ async function main() {
       minPh: 6.0,
       maxPh: 7.0,
       phTarget: 6.5,
-      minMoisture: 30.0,
-      maxMoisture: 80.0,
-      targetMoisture: 30.0,
     },
     {
       name: 'Pakcoy',
@@ -28,9 +25,6 @@ async function main() {
       minPh: 6.0,
       maxPh: 7.5,
       phTarget: 6.8,
-      minMoisture: 35.0,
-      maxMoisture: 85.0,
-      targetMoisture: 30.0,
     },
     {
       name: 'Selada',
@@ -39,9 +33,6 @@ async function main() {
       minPh: 6.0,
       maxPh: 6.7,
       phTarget: 6.5,
-      minMoisture: 25.0,
-      maxMoisture: 75.0,
-      targetMoisture: 30.0,
     }
   ];
 

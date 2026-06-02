@@ -56,7 +56,7 @@ async function startSimulation() {
 
     console.log('\nPilih Jenis Tanaman (Wajib):');
     plants.forEach((plant, index) => {
-      console.log(`${index + 1}. ${plant.name} (${plant.scientificName || 'n/a'}) [Ideal: pH ${plant.minPh}-${plant.maxPh}, Kelembaban ${plant.minMoisture}%-${plant.maxMoisture}%]`);
+      console.log(`${index + 1}. ${plant.name} (${plant.scientificName || 'n/a'}) [Ideal: pH ${plant.minPh}-${plant.maxPh}, Kelembaban 20%-40%]`);
     });
     const plantChoiceInput = await askQuestion('Pilihan Anda (1/2/3...): ');
     const plantIndex = parseInt(plantChoiceInput) - 1;

@@ -86,9 +86,6 @@ model Plant {
   minPh          Float    @map("min_ph")
   maxPh          Float    @map("max_ph")
   phTarget       Float    @map("ph_target")
-  minMoisture    Float    @map("min_moisture")
-  maxMoisture    Float    @map("max_moisture")
-  targetMoisture Float    @map("target_moisture")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

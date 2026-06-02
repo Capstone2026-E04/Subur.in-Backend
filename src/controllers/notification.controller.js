@@ -70,15 +70,10 @@ exports.markAllAsRead = async (req, res) => {
   }
 };
 
-/**
- * Menghapus notifikasi spesifik milik user
- */
 exports.deleteNotification = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-
-    // Verifikasi kepemilikan notifikasi melalui device-user relation
     const notification = await prisma.notification.findFirst({
       where: {
         id: id,
@@ -113,19 +108,14 @@ exports.deleteNotification = async (req, res) => {
   }
 };
 
-/**
- * Membuat notifikasi pengujian (test notification) secara real-time
- */
 exports.createTestNotification = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Cari device milik user terlebih dahulu
     let device = await prisma.device.findFirst({
       where: { userId: userId }
     });
 
-    // Jika belum memiliki device, buatkan device test otomatis agar flow tetap berjalan lancar
     if (!device) {
       const plant = await prisma.plant.findFirst();
       const polybag = await prisma.polybag.findFirst();
@@ -149,45 +139,28 @@ exports.createTestNotification = async (req, res) => {
       });
     }
 
-    // Buat notifikasi pengujian di DB
-    const notification = await prisma.notification.create({
-      data: {
-        deviceId: device.id,
-        title: 'Pengujian Sistem',
-        message: 'Ini adalah notifikasi uji coba untuk memverifikasi bahwa sistem notifikasi real-time Anda berfungsi dengan baik.',
-        type: 'info',
-        isRead: false
-      },
-      include: {
-        device: {
-          select: {
-            label: true
-          }
-        }
+    const mockNotification = {
+      id: `test-notif-${Date.now()}`,
+      deviceId: device.id,
+      title: 'Pengujian Sistem',
+      message: 'Ini adalah notifikasi uji coba untuk memverifikasi bahwa sistem notifikasi real-time Anda berfungsi dengan baik.',
+      type: 'info',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      device: {
+        label: device.label
       }
-    });
+    };
 
-    // Broadcast notifikasi baru via SSE agar langsung terupdate di dashboard user
     broadcastToDevice(device.id, {
       type: "NOTIFICATION",
-      notification: {
-        id: notification.id,
-        deviceId: notification.deviceId,
-        title: notification.title,
-        message: notification.message,
-        type: notification.type,
-        isRead: notification.isRead,
-        createdAt: notification.createdAt,
-        device: {
-          label: device.label
-        }
-      }
+      notification: mockNotification
     });
 
     return res.status(201).json({
       success: true,
-      message: 'Notifikasi uji coba berhasil dibuat secara real-time.',
-      data: { notification }
+      message: 'Notifikasi uji coba berhasil dibuat secara real-time (tanpa disimpan ke database).',
+      data: { notification: mockNotification }
     });
   } catch (error) {
     console.error('Create Test Notification Error:', error);

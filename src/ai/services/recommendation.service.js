@@ -46,15 +46,16 @@ async function generateRecommendation({ phValue, moistureValue, polybagPreset, p
   }
 
   const phTarget = plant.phTarget;
-  const thetaTarget = plant.targetMoisture / 100;
+  const targetMoisture = 30.0;
+  const thetaTarget = targetMoisture / 100;
 
   const plantParams = {
     minPh: plant.minPh,
     maxPh: plant.maxPh,
     phTarget: plant.phTarget,
-    minMoisture: plant.minMoisture,
-    maxMoisture: plant.maxMoisture,
-    targetMoisture: plant.targetMoisture
+    minMoisture: 20.0,
+    maxMoisture: 40.0,
+    targetMoisture: targetMoisture
   };
 
   const inference = runInference(phValue, moistureValue, plantParams);
@@ -69,7 +70,7 @@ async function generateRecommendation({ phValue, moistureValue, polybagPreset, p
   let sulfurDetail     = null;
 
   if (interpretation.needsWater) {
-    waterDetail       = calculateWaterVolume(moistureValue, preset.volumeLiter, plant.targetMoisture);
+    waterDetail       = calculateWaterVolume(moistureValue, preset.volumeLiter, targetMoisture);
     waterVolumeLiter  = waterDetail.waterVolumeLiter;
   }
 
